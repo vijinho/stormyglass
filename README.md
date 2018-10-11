@@ -71,7 +71,7 @@ Output the result to *stdout*, view messages whilst running, and redirect to int
 
 An example for debugging - get the wave-height and humidity for Liverpool, UK using data from The Met Office for yesterday 7am until next thursday, 2230 and display the request that would be sent:
 
-`php stormyglass.php --debug --filename=liverpool.json --latitude=53.416667 --longitude=-2.9779400 --params=waveHeight,humidity --date-from='yesterday, 7am' --date-to='next Friday, 2230' --echo 2>&1 | less`
+`php stormyglass.php --debug --filename=liverpool.json --source=met --latitude=53.416667 --longitude=-2.9779400 --params=waveHeight,humidity --date-from='yesterday, 7am' --date-to='next Friday, 2230' --echo 2>&1 | less`
 
 Note the *V* is (--verbose) mode output, and the *D* is (--debug) mode output, and the numbers following in format 9/9 are memory (used/peak memory used) in script
 
