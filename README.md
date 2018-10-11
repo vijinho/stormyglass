@@ -41,6 +41,7 @@ Call to the stormglass API - https://docs.stormglass.io
 
 ### Requirements/Installation
 
+- An API key [from stormglass](https://stormglass.io/) (free sign-up is 50 request/daily)
 - PHP7
 - curl (command-line)
 - Copy the `stormyglass.ini.dist` to `stormyglass.ini` and add your API key there.
