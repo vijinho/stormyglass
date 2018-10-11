@@ -1,0 +1,15 @@
+; storymglass configuration file
+
+timezone = 'UTC'
+cache[seconds] = 86400;
+
+[stormyglass]
+key = ''
+url[point] = 'https://api.stormglass.io/point'
+url[area] = 'https://api.stormglass.io/area'
+sources = 'all','noaa','meteo','dwd','meto','fcoo','fmi','yr','smhi','wt','sg'
+params = airTemperature,airPressure,humidity,cloudCover,currentDirection,currentSpeed,precipitation,visiblity,swellDirection,swellHeight,swellPeriod,waterTemperature,waveDirection,waveHeight,wavePeriod,windWaveDirection,windWaveHeight,windWavePeriod,seaLevel,windDirection,windSpeed,gust
+
+; for testing: Skagen, Denmark
+latitude = 57.7333333
+longitude = 10.6
