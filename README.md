@@ -24,19 +24,20 @@ Call to the stormglass API - https://docs.stormglass.io
         -h,  --help                   Display this help and exit
         -v,  --verbose                Run in verbose mode
         -d,  --debug                  Run in debug mode (implies also -v, --verbose)
-        -t,  --test                   Run in test mode, show what would be done, NO filesystem changes.
+        -t,  --test                   Run in test mode, using co-ordinates for Skagen, Denmark from stormyglass.ini file by default.
         -o,  --offline                Do not go-online when performing tasks (only use local files for url resolution for example)
-        -e,  --echo                   Echo/output the result to stdout if successful
-             --dir={.}                Directory for storing files (current dir if not specified)
-             --format={json}          Output format for script data: json (default)
-        -f,  --filename={output.}     Filename for output data from operation, default is 'output.{--format}'
-        -k,  --key={api key}          Stormglass API key (loaded from stormyglass.ini if not set)'
-             --date-from={now}        Start date/time (at most 48 hours before current UTC), default 'today 00:00:00' see: https://secure.php.net/manual/en/function.strtotime.php
-             --date-to={all}          End date/time for last forecast, default 'all' see: https://secure.php.net/manual/en/function.strtotime.php
-             --latitude={-90 - 90}    Latitude
-             --longitude={-180 - 180} Longitude
-             --source={all}           Source. Default: 'all'.  One of (all, dwd, fcoo, fmi, meteo, meto, noaa, sg, smhi, wt, yr)
-             --params={}              Param(s). Comma-separated. (airPressure, airTemperature, cloudCover, currentDirection, currentSpeed, gust, humidity, precipitation, seaLevel, swellDirection, swellHeight, swellPeriod, visiblity, waterTemperature, waveDirection, waveHeight, wavePeriod, windDirection, windSpeed, windWaveDirection, windWaveHeight, windWavePeriod)
+        -e,  --echo                   (Optional) Echo/output the result to stdout if successful
+        -r,  --refresh                (Optional) Force cache-refresh
+        -k,  --key={api key}          (Required) Stormglass API key (loaded from stormyglass.ini if not set)'
+             --latitude={-90 - 90}    (Required) Latitude (decimal degrees)
+             --longitude={-180 - 180} (Required) Longitude (decimal degrees)
+             --source={all}           (Optional) Source. Default: 'all'.  One of (all, dwd, fcoo, fmi, meteo, meto, noaa, sg, smhi, wt, yr)
+             --params={}              (Optional) Param(s). Comma-separated. (airPressure, airTemperature, cloudCover, currentDirection, currentSpeed, gust, humidity, precipitation, seaLevel, swellDirection, swellHeight, swellPeriod, visiblity, waterTemperature, waveDirection, waveHeight, wavePeriod, windDirection, windSpeed, windWaveDirection, windWaveHeight, windWavePeriod)
+             --date-from={now}        (Optional) Start date/time (at most 48 hours before current UTC), default 'today 00:00:00' see: https://secure.php.net/manual/en/function.strtotime.php
+             --date-to={all}          (Optional) End date/time for last forecast, default 'all' see: https://secure.php.net/manual/en/function.strtotime.php
+             --dir={.}                (Optional) Directory for storing files (current dir if not specified)
+        -f,  --filename={output.}     (Optional) Filename for output data from operation, default is 'output.{--format}'
+             --format={json}          (Optional) Output format for script data: json (default)
 ```
 
 ### Requirements/Installation
