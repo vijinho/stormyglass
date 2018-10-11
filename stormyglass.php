@@ -151,10 +151,7 @@ if (empty($options) || array_key_exists('h', $options) || array_key_exists('help
     errors:
     if (!empty($errors)) {
         if (is_array($errors)) {
-            output("\nError(s):\n\t- " . join("\n\t- ", $errors) . "\n");
-        } else {
-            print_r($errors);
-            exit;
+             echo json_encode(['errors' => $errors], JSON_PRETTY_PRINT);
         }
     } else {
         output("\nNo errors occurred.\n");
