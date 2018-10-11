@@ -159,6 +159,8 @@ if (empty($options) || array_key_exists('h', $options) || array_key_exists('help
     } else {
         output("\nNo errors occurred.\n");
     }
+
+    goto end;
     exit;
 }
 
@@ -324,6 +326,7 @@ if (!empty($options['date-to'])) {
             $options['date-to'], gmdate('r', $date_to)));
 }
 
+
 //-----------------------------------------------------------------------------
 // MAIN
 // set up request params for sg_point_request($request_params)
@@ -364,8 +367,12 @@ if (!empty($data)) {
 } else {
     debug("Cached file data not found for: $cache_file");
     $data = sg_point_request($request_params);
-    if (empty($data) || !is_array($data)) {
-        $errors[] = "Request failed: " . print_r($data, 1);
+    if (empty($data) || !is_array($data) || array_key_exists('errors', $data)) {
+        if (array_key_exists('errors', $data)) {
+            foreach ($data['errors'] as $param => $error) {
+                $errors[] = sprintf("%s: %s", $param, $error);
+            }
+        }
         goto errors;
     }
 
@@ -421,6 +428,8 @@ if (!empty($output)) {
             break;
     }
 }
+
+end:
 
 debug(sprintf("Memory used (%s) MB (current/peak).", get_memory_used()));
 output("\n");
@@ -763,6 +772,21 @@ function sg_point_request($request_params, $options = [])
                 json_last_error_msg()) . print_r($data, 1);
     } else if (is_array($return)) {
         $return = array_clear($return); // remove empty values
+    }
+
+    // extract errors as messages of param field name => error text array
+    $errors = [];
+    if (array_key_exists('errors', $return)) {
+        foreach ($return['errors'] as $param => $errs) {
+            foreach ($errs as $i => $e) {
+                $errors[$param] = $e;
+            }
+        }
+        debug('Full error response from stormglass:',  print_r($data,1));
+    }
+
+    if (count($errors)) {
+        $return['errors'] = $errors;
     }
 
     return $return;
