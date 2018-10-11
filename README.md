@@ -11,6 +11,15 @@ CLI script `stormyglass.php` calls the [stormglass weather API](https://docs.sto
 - Caches the result (json-encoded) to avoiding sending repeat-requests with configurable cache age time (in seconds)
 - All messages when running with `--debug` or `--verbose` are to *stderr* to avoid interference with *stdout*
 - Can output the result if successful to *stdout*
+- Errors are output in JSON as 'errors' with just a bunch of strings with each error message as opposed to errors => param => array(0 => error) format, e.g.:
+
+```
+{
+    "errors": [
+        "Unknown param(s) specified: 'humiditys'. Must be at least one of (airPressure, airTemperature, cloudCover, currentDirection, currentSpeed, gust, humidity, precipitation, seaLevel, swellDirection, swellHeight, swellPeriod, visiblity, waterTemperature, waveDirection, waveHeight, wavePeriod, windDirection, windSpeed, windWaveDirection, windWaveHeight, windWavePeriod)"
+    ]
+}
+```
 
 ## Instructions
 
@@ -66,6 +75,7 @@ Output result to *stdout*
 Output the result to *stdout*, view messages whilst running, and redirect to into another file:
 
 `php stormyglass.php --filename=data/skagen.json --test --debug --echo 2>&1 >myfile.json`
+
 
 ## Offline mode debugging example
 
