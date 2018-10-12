@@ -601,36 +601,6 @@ function cmd_execute($cmd, $split = true, $exp = "/\n/")
 
 
 /**
- * Clear an array of empty values
- *
- * @param  array $keys array keys to explicitly remove regardless
- * @return array the trimmed down array
- */
-function array_clear($array, $keys = [])
-{
-    foreach ($array as $key => $value) {
-        if (is_array($value)) {
-            do {
-                $oldvalue = $value;
-                $value    = array_clear($value, $keys);
-            }
-            while ($oldvalue !== $value);
-            $array[$key] = array_clear($value, $keys);
-        }
-
-        if (empty($value) && 0 !== $value) {
-            unset($array[$key]);
-        }
-
-        if (in_array($key, $keys, true)) {
-            unset($array[$key]);
-        }
-    }
-    return $array;
-}
-
-
-/**
  * Encode array character encoding recursively
  *
  * @param mixed $data
@@ -761,8 +731,6 @@ function sg_point_request($request_params, $options = [])
     if (empty($data) || empty($return)) {
         $return = sprintf("JSON decode failed: %s\nData:\n\t",
                 json_last_error_msg()) . print_r($data, 1);
-    } else if (is_array($return)) {
-        $return = array_clear($return); // remove empty values
     }
 
     // extract errors as messages of param field name => error text array
