@@ -27,21 +27,21 @@ if (empty($commands)) {
 }
 
 // load stormyglass.ini file
-$config = parse_ini_file(dirname(__FILE__) . '/stormyglass.ini');
+$config = parse_ini_file(dirname(__FILE__) . '/stormyglass.ini', true);
 
-date_default_timezone_set($config['timezone']);
+date_default_timezone_set($config['settings']['timezone']);
 
 // split the comma-separated values from the .ini file:
-$source            = preg_split("/,/", $config['sources']);
+$source            = preg_split("/,/", $config['api']['sources']);
 $source            = array_unique($source);
 sort($source);
-$config['sources'] = $source;
+$config['api']['sources'] = $source;
 unset($source);
 
-$params           = preg_split("/,/", $config['params']);
+$params           = preg_split("/,/", $config['api']['params']);
 $params           = array_unique($params);
 sort($params);
-$config['params'] = $params;
+$config['api']['params'] = $params;
 unset($params);
 
 //-----------------------------------------------------------------------------
@@ -89,17 +89,17 @@ define('DEBUG', (int) $do['debug']);
 define('VERBOSE', (int) $do['verbose']);
 define('TEST', (int) $do['test']);
 define('OFFLINE', (int) $do['offline']);
-define('SG_API_URL_POINT', $config['url']['point']);
-define('SG_API_URL_AREA', $config['url']['area']);
+define('SG_API_URL_POINT', $config['api']['url']['point']);
+define('SG_API_URL_AREA', $config['api']['url']['area']);
 
 debug('CONFIG', $config);
 debug("COMMANDS:", $commands);
 debug('OPTIONS:', $do);
 
 if (TEST) {
-    verbose(sprintf('TEST Mode. Overriding latitude and longitude with config.ini values: %f latitutde, %f longitude', $config['latitude'], $config['longitude']));
-    $options['latitude']  = $config['latitude'];
-    $options['longitude'] = $config['longitude'];
+    verbose(sprintf('TEST Mode. Overriding latitude and longitude with config.ini values: %f latitutde, %f longitude', $config['test']['latitude'], $config['test']['longitude']));
+    $options['latitude']  = $config['test']['latitude'];
+    $options['longitude'] = $config['test']['longitude'];
 }
 
 //-----------------------------------------------------------------------------
@@ -137,9 +137,9 @@ if (empty($options) || array_key_exists('h', $options) || array_key_exists('help
         "\t     --latitude={-90 - 90}    (Required) Latitude (decimal degrees)",
         "\t     --longitude={-180 - 180} (Required) Longitude (decimal degrees)",
         "\t     --source={all}           (Optional) Source. Default: 'all'.  One of (" . join(', ',
-            $config['sources']) . ")",
+            $config['api']['sources']) . ")",
         "\t     --params={}              (Optional) Param(s). Comma-separated. (" . join(', ',
-            $config['params']) . ")",
+            $config['api']['params']) . ")",
         "\t     --date-from={now}        (Optional) Start date/time (at most 48 hours before current UTC), default 'today 00:00:00' see: https://secure.php.net/manual/en/function.strtotime.php",
         "\t     --date-to={all}          (Optional) End date/time for last forecast, default 'all' see: https://secure.php.net/manual/en/function.strtotime.php ",
         "\t     --dir={.}                (Optional) Directory for storing files (current dir if not specified)",
@@ -204,7 +204,7 @@ if (!empty($options['k'])) {
     $key = $options['key'];
 }
 if (empty($key)) {
-    $key = $config['key'];
+    $key = $config['api']['key'];
 }
 if (empty($key)) {
     $errors[] = "You must specify an api key!";
@@ -252,9 +252,9 @@ if (!empty($source)) {
 }
 if (is_array($source)) {
     foreach ($source as $v) {
-        if (!in_array($v, $config['sources'])) {
+        if (!in_array($v, $config['api']['sources'])) {
             $errors[] = "Unknown source(s) specified: '$v'. Must be at least one of (" . join(', ',
-                    $config['sources']) . ")";
+                    $config['api']['sources']) . ")";
             goto errors;
         }
     }
@@ -283,9 +283,9 @@ if (is_string($params)) {
 }
 if (is_array($params)) {
     foreach ($params as $v) {
-        if (!in_array($v, $config['params'])) {
+        if (!in_array($v, $config['api']['params'])) {
             $errors[] = "Unknown param(s) specified: '$v'. Must be at least one of (" . join(', ',
-                    $config['params']) . ")";
+                    $config['api']['params']) . ")";
             goto errors;
         }
     }
@@ -350,7 +350,7 @@ $cache_file = $cache_dir . '/' . $cache_key . '.json';
 
 // load from cache, expire if out-of-date in order to refresh after
 if (!$do['refresh'] && file_exists($cache_file)) {
-    $expired = time() > ($config['cache']['seconds'] + filemtime($cache_file));
+    $expired = time() > ($config['settings']['cache']['seconds'] + filemtime($cache_file));
     if ($expired) {
         unlink($cache_file);
     } else {
