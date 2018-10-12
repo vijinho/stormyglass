@@ -651,16 +651,10 @@ function to_charset($data, $to_charset = 'UTF-8', $from_charset = 'auto')
     } else if (is_array($data)) {
         foreach ($data as $key => $value) {
             $data[$key] = to_charset($value, $to_charset, $from_charset);
-            if (false !== stristr($key, '_str') && is_int($data[$key])) {
-                $data[$key] = (string) $data[$key];
-            }
         }
     } else if (is_object($data)) {
         foreach ($data as $key => $value) {
             $data->$key = to_charset($value, $to_charset, $from_charset);
-        }
-        if (false !== stristr($key, '_str') && is_int($data[$key])) {
-            $data[$key] = (string) $data[$key];
         }
     }
     return $data;
