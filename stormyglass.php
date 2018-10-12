@@ -97,7 +97,7 @@ debug("COMMANDS:", $commands);
 debug('OPTIONS:', $do);
 
 if (TEST) {
-    verbose('TEST Mode. Overriding latitude and longitude.');
+    verbose(sprintf('TEST Mode. Overriding latitude and longitude with config.ini values: %f latitutde, %f longitude', $config['latitude'], $config['longitude']));
     $options['latitude']  = $config['latitude'];
     $options['longitude'] = $config['longitude'];
 }
@@ -177,7 +177,7 @@ switch ($format) {
         $format = 'json';
 }
 define('OUTPUT_FORMAT', $format);
-verbose(sprintf("OUTPUT_FORMAT: %s", $format));
+verbose("OUTPUT_FORMAT: $format");
 
 //-----------------------------------------------------------------------------
 // get dir and file for output
@@ -308,7 +308,7 @@ if (!empty($date_from)) {
         $errors[] = sprintf("Unable to parse --date-from: %s",
             $options['date-from']);
     }
-    verbose(sprintf("Filtering tweets FROM date/time '%s': %s",
+    verbose(sprintf("Fetching results FROM date/time '%s': %s",
             $options['date-from'], gmdate('r', $date_from)));
 }
 
@@ -319,7 +319,7 @@ if (!empty($options['date-to'])) {
     if (false === $date_to) {
         $errors[] = sprintf("Unable to parse --date-to: %s", $options['date-to']);
     }
-    verbose(sprintf("Filtering tweets TO date/time '%s': %s",
+    verbose(sprintf("Fetching results TO date/time '%s': %s",
             $options['date-to'], gmdate('r', $date_to)));
 }
 
@@ -643,7 +643,7 @@ function json_load($file)
     if (file_exists($file)) {
         $data = to_charset(file_get_contents($file));
         $data = json_decode(
-            mb_convert_encoding($data, "UTF-8", "auto"), true, 512,
+            mb_convert_encoding($data, 'UTF-8', "auto"), true, 512,
             JSON_OBJECT_AS_ARRAY || JSON_BIGINT_AS_STRING
         );
     }
@@ -712,7 +712,7 @@ function sg_point_request($request_params, $options = [])
     $curl_url_resolve  = "curl $curl_options_auth $curl_options -L -s " . escapeshellarg($url);
 
     if (OFFLINE) {
-        debug("OFFLINE MODE! Can't request:\n\t$curl_url_resolve\n\t");
+        debug(sprintf("OFFLINE MODE! Can't request:\n\t%s\n\t", $curl_url_resolve));
         return false;
     }
 
@@ -723,7 +723,7 @@ function sg_point_request($request_params, $options = [])
     if (!empty($data)) {
         $return = to_charset($data);
         $return = json_decode(
-            mb_convert_encoding($return, "UTF-8", "auto"), true, 512,
+            mb_convert_encoding($return, 'UTF-8', "auto"), true, 512,
             JSON_OBJECT_AS_ARRAY || JSON_BIGINT_AS_STRING
         );
     }
