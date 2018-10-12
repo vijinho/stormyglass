@@ -343,8 +343,8 @@ foreach ($request_params as $k => $v) {
 verbose('Request params:', $request_params);
 
 // load from cache
-$cache_key  = sha1(join('-', array_keys($request_params)) . join('-',
-        $request_params));
+$cache_key  = join('-', array_keys($request_params)) . '-' . join('_',
+        $request_params);
 $cache_dir  = realpath(dirname(__FILE__)) . '/cache';
 $cache_file = $cache_dir . '/' . $cache_key . '.json';
 
