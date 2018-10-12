@@ -9,6 +9,7 @@ CLI script `stormyglass.php` calls the [stormglass weather API](https://docs.sto
 - Uses command-line [curl](https://curl.haxx.se)
 - Validates parameters before sending
 - Caches the result (json-encoded) to avoiding sending repeat-requests with configurable cache age time (in seconds)
+- Cache filename is human-readable - format is: key1-key-2..._value1_value2....json, ie. *cache/lat-lng-57.7333333_10.6.json*
 - All messages when running with `--debug` or `--verbose` are to *stderr* to avoid interference with *stdout*
 - Can output the result if successful to *stdout*
 - Errors are output in JSON as 'errors' with just a bunch of strings with each error message as opposed to errors => param => array(0 => error) format, e.g.:
