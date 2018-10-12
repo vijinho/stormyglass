@@ -64,17 +64,17 @@ Run the following to run the test and view in 'less' text viewer:
 
 This will use the default co-ordinates of Skagen, Denmark and if successful will write-out a json file to the `cache` directory.
 
-Running the same command-line again will retrieve the data from the cached file, e.g. this, which will write the result also to a file called `data/skagen.json`
+Running the same command-line again will retrieve the data from the cached file, e.g. this, which will write the result also to a file called `skagen.json`
 
-`php stormyglass.php --verbose --filename=data/skagen.json --test 2>&1 | less`
+`php stormyglass.php --verbose --filename=skagen.json --test 2>&1 | less`
 
 Output result to *stdout*
 
-`php stormyglass.php --filename=data/skagen.json --test --echo`
+`php stormyglass.php --filename=skagen.json --test --echo`
 
 Output the result to *stdout*, view messages whilst running, and redirect to into another file:
 
-`php stormyglass.php --filename=data/skagen.json --test --debug --echo 2>&1 >myfile.json`
+`php stormyglass.php --filename=skagen.json --test --debug --echo 2>&1 >myfile.json`
 
 
 ## Offline mode debugging example
