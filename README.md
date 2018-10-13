@@ -1,4 +1,4 @@
-# stormyglass
+# stormyglass  - a command-line php script for Storm Glass - The Global Marine Weather Forecast API
 
 CLI script `stormyglass.php` calls the [stormglass weather API](https://docs.stormglass.io/) and writes the JSON to a file if successful. Optionally will output the result to *stdout*.
 
