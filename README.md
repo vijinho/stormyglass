@@ -8,6 +8,7 @@ CLI script `stormyglass.php` calls the [stormglass weather API](https://docs.sto
 - Uses a simple [stormyglass.ini](stormyglass.ini.dist) configuration file for options
 - Uses command-line [curl](https://curl.haxx.se)
 - Validates parameters before sending
+- Provided with global city data (populations > 15000) from http://download.geonames.org/export/dump/ (cities15000.zip) listed/saved as JSON using --cities option, see also [data/cities15000.txt](data/cities15000.txt)
 - Caches the result (json-encoded) to avoiding sending repeat-requests with configurable cache age time (in seconds)
 - Cache filename is human-readable - format is: key1-key-2..._value1_value2....json, ie. *cache/lat-lng-57.7333333_10.6.json*
 - All messages when running with `--debug` or `--verbose` are to *stderr* to avoid interference with *stdout*
@@ -256,6 +257,13 @@ The actual result:
     }
 }
 ```
+
+## Updating cities list
+
+- Go to [http://download.geonames.org/export/dump/](http://download.geonames.org/export/dump/)
+- Download [cities15000.zip](http://download.geonames.org/export/dump/cities15000.zip)
+- Unzip and save to [data/cities.tsv](data/cities.tsv)
+- Run script with '-r' to refresh cache and '--cities' to re-create [cache/cities.json](cache/cities.json)
 
 ## See also
 

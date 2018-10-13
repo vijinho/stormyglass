@@ -12,6 +12,7 @@
 ini_set('default_charset', 'utf-8');
 ini_set('mbstring.encoding_translation', 'On');
 ini_set('mbstring.func_overload', 6);
+ini_set('auto_detect_line_endings',TRUE);
 
 //-----------------------------------------------------------------------------
 // required commands check
@@ -60,6 +61,7 @@ $options = getopt("hvdtk:",
     'params:',
     'format:',
     'refresh',
+    'cities',
     ]);
 
 $do = [];
@@ -71,6 +73,7 @@ foreach ([
  'offline' => ['o', 'offline'],
  'echo'    => ['e', 'echo'],
  'refresh' => ['r', 'refresh'],
+ 'cities' => [null, 'cities'],
 ] as $i => $opts) {
     $do[$i] = (int) (array_key_exists($opts[0], $options) || array_key_exists($opts[1],
             $options));
@@ -132,6 +135,7 @@ if (empty($options) || array_key_exists('h', $options) || array_key_exists('help
         "\t-t,  --test                   Run in test mode, using co-ordinates for Skagen, Denmark from stormyglass.ini file by default.",
         "\t-o,  --offline                Do not go-online when performing tasks (only use local files for url resolution for example)",
         "\t-e,  --echo                   (Optional) Echo/output the result to stdout if successful",
+        "\t     --cities                 List known cities with id, names and geolocation co-ordinates then exit.",
         "\t-r,  --refresh                (Optional) Force cache-refresh",
         "\t-k,  --key={api key}          (Required) Stormglass API key (loaded from stormyglass.ini if not set)'",
         "\t     --latitude={-90 - 90}    (Required) Latitude (decimal degrees)",
@@ -166,7 +170,7 @@ if (empty($options) || array_key_exists('h', $options) || array_key_exists('help
 
 $errors = []; // errors to be output if a problem occurred
 $output = []; // data to be output at the end
-
+$save_data = true; // save the array $data in 'output:' section at the end
 $format = '';
 if (!empty($options['format'])) {
     $format = $options['format'];
@@ -193,6 +197,41 @@ if (empty($dircheck) || !is_dir($dircheck)) {
 }
 
 $output_filename = !empty($options['filename']) ? $options['filename'] : 'output.' . OUTPUT_FORMAT;
+
+
+//-----------------------------------------------------------------------------
+// list cities
+//
+// data for cities from http://download.geonames.org/export/dump/
+$data_dir  = realpath(dirname(__FILE__)) . '/data';
+$cities_file = $data_dir . '/cities15000.tsv';
+if (!file_exists($cities_file)) {
+    $errors[] = "Missing cities file: $cities_file";
+    goto errors;
+}
+define('FILE_TSV_CITIES', $cities_file);
+
+if ($do['cities']) {
+    $data = [];
+    $output_filename = 'cache/cities.json';
+    // remove old-file if refresh
+    if ($do['refresh']) {
+        unlink($output_filename);
+    }
+    if (file_exists($output_filename)) {
+        $data = json_load($output_filename);
+        if (is_array($data) && count($data)) {
+            debug("Cached city data loaded from: $output_filename");
+            $save_data = false;
+        } else {
+            debug("Cached file data not found for: $cache_file");
+        }
+    }
+    if (empty($data)) {
+        $data = getCities();
+    }
+    goto output;
+}
 
 //-----------------------------------------------------------------------------
 // get api key
@@ -401,7 +440,7 @@ if (is_array($data) && !empty($data)) {
 }
 
 // only write/display output if we have some!
-if (!empty($output)) {
+if (!empty($output) && $save_data) {
 
     $file = realpath($dir) . '/' . $output_filename;
     switch (OUTPUT_FORMAT) {
@@ -611,7 +650,8 @@ function cmd_execute($cmd, $split = true, $exp = "/\n/")
 function to_charset($data, $to_charset = 'UTF-8', $from_charset = 'auto')
 {
     if (is_numeric($data)) {
-        if (is_float($data)) {
+        $float = (string)(float) $data;
+        if ($data === $float) {
             return (float) $data;
         } else {
             return (int) $data;
@@ -751,3 +791,43 @@ function sg_point_request($request_params, $options = [])
     return $return;
 }
 
+/**
+ * Read in geonames cities TSV file
+ *
+ * @param optional int $id id of city to find
+ * @return array of cities or city
+ * @see http://download.geonames.org/export/dump/
+ * @url http://www.geonames.org/export/
+ */
+function getCities($id = 0) {
+    $fh = fopen(FILE_TSV_CITIES, 'r');
+    $cities = [];
+    if (!empty($id)) {
+        $id = (int) $id;
+    }
+    while ($data = fgetcsv($fh, 0, "\t")) {
+        $data = to_charset($data);
+        $geoname_id = (int) $data[0];
+        $city = [
+            'id' => $data[0],
+            'country_code' => $data[8],
+            'state' => $data[10],
+            'city' => $data[1],
+            'ascii' => $data[2],
+            'names' => preg_split('/,/', $data[3]),
+            'latitude' => (float) $data[4],
+            'longitude' => (float) $data[5],
+            'elevation' => (int) $data[16],
+            'population' => empty($data[15]) ? null : (int) $data[15],
+            'timezone' => $data[17],
+        ];
+        if (0 === $id) {
+            $cities[$geoname_id] = $city;
+        } else {
+            $cities = [$geoname_id => $city];
+            break;
+        }
+    }
+    fclose($fh);
+    return $cities;
+}
