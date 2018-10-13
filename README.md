@@ -24,6 +24,34 @@ CLI script `stormyglass.php` calls the [stormglass weather API](https://docs.sto
 }
 ```
 
+## Returned results fields/columns/keys
+
+- time - Timestamp in UTC
+- airTemperature - Air temperature in degrees celsius
+- airPressure - Air pressure in hPa
+- cloudCover - Total cloud coverage in percent
+- currentDirection -Direction of current.
+- currentSpeed - Speed of current in meters per second.
+- gust - Wind gust in m/s
+- humidity - Relative humidity in percent
+- iceCover - Proportion, 0-1
+- precipitation - Mean precipitation in kg/m²
+- seaLevel - Height of sea level in MLLW (tides).
+- snowDepth - Depth of snow in meters
+- swellDirection - Direction of swell waves. 0° indicates swell coming from north
+- swellHeight - Height of swell waves in meters
+- swellPeriod - Period of swell waves in seconds
+- visiblity	Horizontal - visibility in km
+- waterTemperature - Water temperature in degrees celsius
+- waveDirection - Direction of combined wind and swell waves. 0° indicates waves coming from north
+- waveHeight - Height of combined wind and swell waves
+- wavePeriod - Period of combined wind and swell waves
+- windWaveDirection - Direction of wind waves. 0° indicates waves coming from north
+- windWaveHeight - Height of wind waves
+- windWavePeriod - Period of wind waves
+- windDirection	- Direction of wind. 0° indicates wind coming from north
+- windSpeed	- Speed of wind in meters per second
+
 ## Instructions
 
 ### Command-line options
