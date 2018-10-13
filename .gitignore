@@ -1,0 +1,9 @@
+*.DS_Store
+*.bak
+*.swp
+*.tmp
+*~
+.DS_Store
+stormyglass.ini
+cache/*.json
+*.json
