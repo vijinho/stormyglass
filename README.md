@@ -11,6 +11,7 @@ CLI script `stormyglass.php` calls the [stormglass weather API](https://docs.sto
 - Provided with global city data (populations > 15000) from http://download.geonames.org/export/dump/ (cities15000.zip) listed/saved as JSON using --cities option, see also [data/cities15000.txt](data/cities15000.txt)
 - Caches the result (json-encoded) to avoiding sending repeat-requests with configurable cache age time (in seconds)
 - Cache filename is human-readable - format is: key1-key-2..._value1_value2....json, ie. *cache/lat-lng-57.7333333_10.6.json*
+- Option to return results averaged-out across sources
 - All messages when running with `--debug` or `--verbose` are to *stderr* to avoid interference with *stdout*
 - Can output the result if successful to *stdout*
 - Errors are output in JSON as 'errors' with just a bunch of strings with each error message as opposed to errors => param => array(0 => error) format, e.g.:
@@ -38,6 +39,7 @@ Call to the stormglass API - https://docs.stormglass.io
         -t,  --test                   Run in test mode, using co-ordinates for Skagen, Denmark from stormyglass.ini file by default.
         -o,  --offline                Do not go-online when performing tasks (only use local files for url resolution for example)
         -e,  --echo                   (Optional) Echo/output the result to stdout if successful
+             --average                Return the average of the combined results from across the various sources.
              --cities                 List known cities with id, names and geolocation co-ordinates then exit.
         -r,  --refresh                (Optional) Force cache-refresh
         -k,  --key={api key}          (Required) Stormglass API key (loaded from stormyglass.ini if not set)'
@@ -79,6 +81,106 @@ Output result to *stdout*
 Output the result to *stdout*, view messages whilst running, and redirect to into another file:
 
 `php stormyglass.php --filename=skagen.json --test --debug --echo 2>&1 >myfile.json`
+
+## Test using averaged-out results
+
+Return averaged-out results across sources, using 'unixtime' as the index for 'hours'
+
+`php stormyglass.php --debug --test --average`
+
+```
+{
+    "hours": {
+        "1539302400": {
+            "airTemperature": 13,
+            "cloudCover": 0,
+            "currentDirection": 230,
+            "currentSpeed": 0,
+            "gust": 10,
+            "humidity": 85,
+            "precipitation": 0,
+            "pressure": 1016,
+            "seaLevel": 0,
+            "swellDirection": 182,
+            "swellHeight": 0,
+            "swellPeriod": 3,
+            "time": "2018-10-12T00:00:00+00:00",
+            "visibility": 26,
+            "waterTemperature": 11,
+            "waveDirection": 134,
+            "waveHeight": 1,
+            "wavePeriod": 3,
+            "windDirection": 144,
+            "windSpeed": 6,
+            "windWaveDirection": 138,
+            "windWaveHeight": 1,
+            "windWavePeriod": 3,
+            "unixtime": 1539302400
+        },
+        "1539306000": {
+            "airTemperature": 13,
+            "cloudCover": 0,
+            "currentDirection": 220,
+            "currentSpeed": 0,
+            "gust": 9,
+            "humidity": 86,
+            "precipitation": 0,
+            "pressure": 1017,
+            "seaLevel": 0,
+            "swellDirection": 161,
+            "swellHeight": 0,
+            "swellPeriod": 3,
+            "time": "2018-10-12T01:00:00+00:00",
+            "visibility": 25,
+            "waterTemperature": 11,
+            "waveDirection": 134,
+            "waveHeight": 1,
+            "wavePeriod": 3,
+            "windDirection": 150,
+            "windSpeed": 5,
+            "windWaveDirection": 138,
+            "windWaveHeight": 1,
+            "windWavePeriod": 3,
+            "unixtime": 1539306000
+        },
+<!--- SNIP --->
+    },
+    "meta": {
+        "cost": 1,
+        "dailyQuota": 50,
+        "end": "2018-10-22 00:00",
+        "lat": 57,
+        "lng": 10,
+        "params": [
+            "waterTemperature",
+            "wavePeriod",
+            "waveDirection",
+            "waveDirection",
+            "waveHeight",
+            "windWaveDirection",
+            "windWaveHeight",
+            "windWavePeriod",
+            "swellPeriod",
+            "swellDirection",
+            "swellHeight",
+            "windSpeed",
+            "windDirection",
+            "airTemperature",
+            "precipitation",
+            "gust",
+            "cloudCover",
+            "humidity",
+            "pressure",
+            "visibility",
+            "seaLevel",
+            "currentSpeed",
+            "currentDirection"
+        ],
+        "requestCount": 5,
+        "start": "2018-10-12 00:00"
+    }
+}
+```
 
 ## Test example using GeoNames City ID
 

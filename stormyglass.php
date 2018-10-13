@@ -63,6 +63,7 @@ $options = getopt("hvdtk:",
     'refresh',
     'cities',
     'city-id:',
+    'average',
     ]);
 
 $do = [];
@@ -75,6 +76,7 @@ foreach ([
  'echo'    => ['e', 'echo'],
  'refresh' => ['r', 'refresh'],
  'cities' => [null, 'cities'],
+ 'average' => [null, 'average'],
 ] as $i => $opts) {
     $do[$i] = (int) (array_key_exists($opts[0], $options) || array_key_exists($opts[1],
             $options));
@@ -148,6 +150,7 @@ if (empty($options) || array_key_exists('h', $options) || array_key_exists('help
             $config['api']['params']) . ")",
         "\t     --date-from={now}        (Optional) Start date/time (at most 48 hours before current UTC), default 'today 00:00:00' see: https://secure.php.net/manual/en/function.strtotime.php",
         "\t     --date-to={all}          (Optional) End date/time for last forecast, default 'all' see: https://secure.php.net/manual/en/function.strtotime.php ",
+        "\t     --average                Return the average of the combined results from across the various sources.",
         "\t     --dir={.}                (Optional) Directory for storing files (current dir if not specified)",
         "\t-f,  --filename={output.}     (Optional) Filename for output data from operation, default is 'output.{--format}'",
         "\t     --format={json}          (Optional) Output format for script data: json (default)",
@@ -441,6 +444,38 @@ if (!empty($data)) {
         verbose(sprintf("JSON written to output file:\n\t%s (%d bytes)\n",
                 $cache_file, filesize($cache_file)));
     }
+}
+
+// average-out results
+if (!empty($data) && $do['average']) {
+    foreach ($data['hours'] as $i => $dataset) {
+        foreach ($dataset as $field => $source) {
+            if ('time' === $field && is_string($source)) {
+                $time = strtotime($source);
+                $dataset['unixtime'] = $time;
+            } else if (is_array($source)) {
+                $value = 0;
+                $nvalues = 0;
+                foreach ($source as $values) {
+                    if (array_key_exists('value', $values)) {
+                        $v = (float) $values['value'];
+                        if (0 < $v) {
+                            $nvalues++;
+                            $value += $v;
+                        }
+                    }
+                }
+                $average = (0 === $value) ? 0 : round($value / $nvalues, 3);
+                $source['average'] = average;
+                $dataset[$field] = $average;
+            }
+        }
+        // remove numerical incremental index, make index the unixtime
+        unset($data['hours'][$i]);
+        $data['hours'][$dataset['unixtime']] = $dataset;
+    }
+    // sort results
+    ksort($data['hours']);
 }
 
 //-----------------------------------------------------------------------------
@@ -806,6 +841,10 @@ function sg_point_request($request_params, $options = [])
     if (count($errors)) {
         $return['errors'] = $errors;
     }
+
+    // sort meta-data to aid redability
+    ksort($return['meta']);
+    sort($return['meta']['params']);
 
     return $return;
 }
