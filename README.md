@@ -2,6 +2,8 @@
 
 CLI script `stormyglass.php` calls the [stormglass weather API](https://docs.stormglass.io/) and writes the JSON to a file if successful. Optionally will output the result to *stdout*.
 
+The script can also be run as a web-service with PHP's in-built webserver for testing the JSON request/responses.
+
 ## Features
 
 - Runs on the command-line
@@ -442,7 +444,21 @@ The actual result:
 1. Start the PHP webserver with `php -S 127.0.0.1:12312`
 2. Browse the URL: http://127.0.0.1:12312/stormyglass.php with GET/POST parameters as required.
 
-### Example 1
+*NOTE:* The webservice only allows the following parameters which will be filtered and passed to the command-line script:
+
+- 'key'
+- 'date-from'
+- 'date-to'
+- 'latitude'
+- 'longitude'
+- 'source'
+- 'params'
+- 'refresh'
+- 'cities'
+- 'city-id'
+- 'average'
+
+### Webservice Example 1
 
 e.g. For -id 999999 http://127.0.0.1:12312/stormyglass.php?city-id=999999
 
@@ -458,7 +474,7 @@ Returns:
 }
 ```
 
-### Example 2
+### Webservice Example 2
 
 Get averaged-out results from the web-service for city 1120985:
 
