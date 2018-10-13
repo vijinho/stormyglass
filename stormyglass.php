@@ -1,4 +1,3 @@
-#!/usr/bin/php
 <?php
 /**
  * stormyglass.php - CLI script for interacting with stormglass api
@@ -13,6 +12,61 @@ ini_set('default_charset', 'utf-8');
 ini_set('mbstring.encoding_translation', 'On');
 ini_set('mbstring.func_overload', 6);
 ini_set('auto_detect_line_endings',TRUE);
+
+// detect if run in web mode or cli
+switch (php_sapi_name()) {
+    case 'cli':
+        break;
+    default:
+    case 'cli-server': // run as web-service
+        define('DEBUG', 0);
+        $save_data = 0;
+        $params = [
+            'key',
+            'date-from',
+            'date-to',
+            'latitude',
+            'longitude',
+            'source',
+            'params',
+            'refresh',
+            'cities',
+            'city-id',
+            'average',
+        ];
+
+        // filter input variables
+        $_REQUEST = array_change_key_case($_REQUEST);
+        $keys = array_intersect($params, array_keys($_REQUEST));
+        $params = [];
+        foreach ($_REQUEST as $k => $v) {
+            if (!in_array($k, $keys)) {
+                unset($_REQUEST[$k]);
+                continue;
+            }
+            $v = trim(strip_tags(filter_var(urldecode($v), FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_LOW)));
+            if (!empty($v)) {
+                $_REQUEST[$k] = $v;
+                // params to command line
+                $params['--' . $k] = escapeshellarg($v);
+            } else {
+                $params['--' . $k] = '';
+            }
+        }
+
+        // build command line
+        $php = cmd_execute('which php');
+        $cmd = $php[0] . ' ' . $_SERVER['SCRIPT_FILENAME'] . ' --echo ';
+        foreach ($params as $k => $v) {
+            $cmd .= (empty($v)) ? " $k" : " $k=$v";
+        }
+
+        // exexute command line and quit
+        $data = shell_execute($cmd);
+        header('Content-Type: application/json');
+        echo $data['stdout'];
+        exit;
+}
 
 //-----------------------------------------------------------------------------
 // required commands check
@@ -434,6 +488,11 @@ if (!empty($data)) {
         goto errors;
     }
 
+    // add city to meta-data
+    if (!empty($data) && !empty($city) && array_key_exists('meta', $data)) {
+        $data['meta']['city'] = $city;
+    }
+
     // cache the result
     $save = json_save($cache_file, $data);
     if (true !== $save) {
@@ -527,28 +586,30 @@ if (is_array($data) && !empty($data)) {
 }
 
 // only write/display output if we have some!
-if (!empty($output) && $save_data) {
+if (!empty($output)) {
 
-    $file = realpath($dir) . '/' . $output_filename;
-    switch (OUTPUT_FORMAT) {
-        default:
-        case 'json':
-            $save = json_save($file, $output);
-            if (true !== $save) {
-                $errors[] = "\nFailed encoding JSON output file:\n\t$file\n";
-                $errors[] = "\nJSON Error: $save\n";
-                goto errors;
-            } else {
-                verbose(sprintf("JSON written to output file:\n\t%s (%d bytes)\n",
-                        $file, filesize($file)));
-            }
+    if ($save_data) {
+        $file = realpath($dir) . '/' . $output_filename;
+        switch (OUTPUT_FORMAT) {
+            default:
+            case 'json':
+                $save = json_save($file, $output);
+                if (true !== $save) {
+                    $errors[] = "\nFailed encoding JSON output file:\n\t$file\n";
+                    $errors[] = "\nJSON Error: $save\n";
+                    goto errors;
+                } else {
+                    verbose(sprintf("JSON written to output file:\n\t%s (%d bytes)\n",
+                            $file, filesize($file)));
+                }
+                break;
+        }
 
-            // output data if --echo
-            if ($do['echo']) {
-                echo json_encode($output, JSON_PRETTY_PRINT);
-            }
+    }
 
-            break;
+    // output data if --echo
+    if ($do['echo']) {
+        echo json_encode($output, JSON_PRETTY_PRINT);
     }
 }
 

@@ -7,10 +7,12 @@ CLI script `stormyglass.php` calls the [stormglass weather API](https://docs.sto
 - Runs on the command-line
 - Uses a simple [stormyglass.ini](stormyglass.ini.dist) configuration file for options
 - Uses command-line [curl](https://curl.haxx.se)
+- Can be called as a stand-alone webservice using the php command line built-in server
 - Validates parameters before sending
 - Provided with global city data (populations > 15000) from http://download.geonames.org/export/dump/ (cities15000.zip) listed/saved as JSON using --cities option, see also [data/cities15000.txt](data/cities15000.txt)
+- When calling with a city-id, adds the city information to the 'meta' information returned in the JSON result
 - Caches the result (json-encoded) to avoiding sending repeat-requests with configurable cache age time (in seconds)
-- Cache filename is human-readable - format is: key1-key-2..._value1_value2....json, ie. *cache/lat-lng-57.7333333_10.6.json*
+- Cache filename is human-readable - format is: keys-values ie. *cache/lat-lng-57.7333333_10.6.json*
 - Option to return results averaged-out across sources
 - All messages when running with `--debug` or `--verbose` are to *stderr* to avoid interference with *stdout*
 - Can output the result if successful to *stdout*
@@ -433,6 +435,143 @@ The actual result:
 - Download [cities15000.zip](http://download.geonames.org/export/dump/cities15000.zip)
 - Unzip and save to [data/cities.tsv](data/cities.tsv)
 - Run script with '-r' to refresh cache and '--cities' to re-create [cache/cities.json](cache/cities.json)
+
+## Running as a webservice
+
+### Starting the service
+1. Start the PHP webserver with `php -S 127.0.0.1:12312`
+2. Browse the URL: http://127.0.0.1:12312/stormyglass.php with GET/POST parameters as required.
+
+### Example 1
+
+e.g. For -id 999999 http://127.0.0.1:12312/stormyglass.php?city-id=999999
+
+http://127.0.0.1:12312/stormyglass.php?city-id=999999
+
+Returns:
+
+```
+{
+    "errors": [
+        "City not found with id: 292672222"
+    ]
+}
+```
+
+### Example 2
+
+Get averaged-out results from the web-service for city 1120985:
+
+http://127.0.0.1:12312/stormyglass.php?city-id=1120985&average
+
+Results:
+
+```
+{
+    "hours": {
+        "1539388800": {
+            "airTemperature": 21.07,
+            "cloudCover": 0,
+            "currentDirection": 0,
+            "currentSpeed": 0,
+            "gust": 5.88,
+            "humidity": 14.35,
+            "precipitation": 0,
+            "pressure": 1014.57,
+            "seaLevel": 0,
+            "swellDirection": 0,
+            "swellHeight": 0,
+            "swellPeriod": 0,
+            "time": "2018-10-13T00:00:00+00:00",
+            "visibility": 24.1,
+            "waterTemperature": 18.55,
+            "waveDirection": 0,
+            "waveHeight": 0,
+            "wavePeriod": 0,
+            "windDirection": 0,
+            "windSpeed": 0,
+            "windWaveDirection": 0,
+            "windWaveHeight": 0,
+            "windWavePeriod": 0,
+            "unixtime": 1539388800
+        },
+<!--- SNIP --->
+    "meta": {
+        "cost": 1,
+        "dailyQuota": 50,
+        "end": "2018-10-23 00:00",
+        "lat": 30.95962,
+        "lng": 61.86037,
+        "params": [
+            "airTemperature",
+            "cloudCover",
+            "currentDirection",
+            "currentSpeed",
+            "gust",
+            "humidity",
+            "precipitation",
+            "pressure",
+            "seaLevel",
+            "swellDirection",
+            "swellHeight",
+            "swellPeriod",
+            "visibility",
+            "waterTemperature",
+            "waveDirection",
+            "waveDirection",
+            "waveHeight",
+            "wavePeriod",
+            "windDirection",
+            "windSpeed",
+            "windWaveDirection",
+            "windWaveHeight",
+            "windWavePeriod"
+        ],
+        "requestCount": 4,
+        "start": "2018-10-13 00:00",
+        "city": {
+            "id": 1120985,
+            "country_code": "AF",
+            "state": 19,
+            "city": "Zaranj",
+            "ascii": "Zaranj",
+            "names": [
+                "Sarandsch",
+                "ZAJ",
+                "Zaranas",
+                "Zarandj",
+                "Zarandz",
+                "Zarandzas",
+                "Zarandzh",
+                "Zarand\u017c",
+                "Zarand\u017eas",
+                "Zarang",
+                "Zarani",
+                "Zaranj",
+                "Zaran\u011d",
+                "Zerenc",
+                "Zhazang",
+                "Z\u0259r\u0259nc",
+                "zaranja",
+                "zha lan ji",
+                "zrnj",
+                "\u0417\u0430\u0440\u0430\u043d\u0434\u0436",
+                "\u0417\u0430\u0440\u0430\u043d\u0438",
+                "\u0417\u0430\u0440\u0430\u043d\u04b7",
+                "\u0632\u0631\u0646\u062c",
+                "\u091c\u093c\u0930\u0902\u091c",
+                "\u624e\u5170\u5b63"
+            ],
+            "latitude": 30.95962,
+            "longitude": 61.86037,
+            "elevation": 489,
+            "population": null,
+            "timezone": "Asia\/Kabul"
+        }
+    }
+}
+```
+
 
 ## See also
 
