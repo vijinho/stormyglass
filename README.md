@@ -13,6 +13,7 @@ The script can also be run as a web-service with PHP's in-built webserver for te
 - Validates parameters before sending
 - Provided with global city data (populations > 15000) from http://download.geonames.org/export/dump/ (cities15000.zip) listed/saved as JSON using --cities option, see also [data/cities15000.txt](data/cities15000.txt)
 - When calling with a city-id, adds the city information to the 'meta' information returned in the JSON result
+- Option to search for city information with --search-city
 - Caches the result (json-encoded) to avoiding sending repeat-requests with configurable cache age time (in seconds)
 - Cache filename is human-readable - format is: keys-values ie. *cache/lat-lng-57.7333333_10.6.json*
 - Option to return results averaged-out across sources
@@ -71,8 +72,8 @@ Call to the stormglass API - https://docs.stormglass.io
         -t,  --test                   Run in test mode, using co-ordinates for Skagen, Denmark from stormyglass.ini file by default.
         -o,  --offline                Do not go-online when performing tasks (only use local files for url resolution for example)
         -e,  --echo                   (Optional) Echo/output the result to stdout if successful
-             --average                Return the average of the combined results from across the various sources.
              --cities                 List known cities with id, names and geolocation co-ordinates then exit.
+             --search-city=<text>     Search for city using supplied text.
         -r,  --refresh                (Optional) Force cache-refresh
         -k,  --key={api key}          (Required) Stormglass API key (loaded from stormyglass.ini if not set)'
              --city-id={city_id}      (Optional) Specify GeoNames city id (in cities.json file) for required latitude/longitude values
@@ -82,6 +83,7 @@ Call to the stormglass API - https://docs.stormglass.io
              --params={}              (Optional) Param(s). Comma-separated. (airPressure, airTemperature, cloudCover, currentDirection, currentSpeed, gust, humidity, precipitation, seaLevel, swellDirection, swellHeight, swellPeriod, visiblity, waterTemperature, waveDirection, waveHeight, wavePeriod, windDirection, windSpeed, windWaveDirection, windWaveHeight, windWavePeriod)
              --date-from={now}        (Optional) Start date/time (at most 48 hours before current UTC), default 'today 00:00:00' see: https://secure.php.net/manual/en/function.strtotime.php
              --date-to={all}          (Optional) End date/time for last forecast, default 'all' see: https://secure.php.net/manual/en/function.strtotime.php
+             --average                Return the average of the combined results from across the various sources.
              --dir={.}                (Optional) Directory for storing files (current dir if not specified)
         -f,  --filename={output.}     (Optional) Filename for output data from operation, default is 'output.{--format}'
              --format={json}          (Optional) Output format for script data: json (default)
@@ -113,6 +115,111 @@ Output result to *stdout*
 Output the result to *stdout*, view messages whilst running, and redirect to into another file:
 
 `php stormyglass.php --filename=skagen.json --test --debug --echo 2>&1 >myfile.json`
+
+## Search city example
+
+`php stormyglass.php --echo --search-city=birmingham`
+
+Results:
+
+```
+{
+    "2655603": {
+        "id": 2655603,
+        "country_code": "GB",
+        "state": "ENG",
+        "city": "Birmingham",
+        "ascii": "Birmingham",
+        "names": [
+            "BHX",
+            "Birmin'gxam",
+            "Birmingam",
+            "Birmingamas",
+            "Birmingem",
+            "Birmingema",
+            "Birmingham",
+            "Birminghamia",
+            "Birminghem",
+            "Gorad Birmingem",
+            "Mpermincham",
+            "bamingamu",
+            "barming'hyam",
+            "barmingahama",
+            "barmingahema",
+            "barmingham",
+            "barminghama",
+            "beoming-eom",
+            "birmingemi",
+            "bo ming han",
+            "bo ming han shi",
+            "brmngm",
+            "brmynghham",
+            "byrmngam",
+            "parminkam"
+        ],
+        "latitude": 52.48142,
+        "longitude": -1.89983,
+        "elevation": 149,
+        "population": null,
+        "timezone": "Europe\/London"
+    },
+    "4049979": {
+        "id": 4049979,
+        "country_code": "US",
+        "state": "AL",
+        "city": "Birmingham",
+        "ascii": "Birmingham",
+        "names": [
+            "BHM",
+            "Bermincham",
+            "Bermingkham",
+            "Birmingam",
+            "Birmingamas",
+            "Birmingem",
+            "Birmingema",
+            "Birmingham",
+            "Birmingham i Alabama",
+            "Birminhem",
+            "Gorad Birmingem",
+            "baminguhamu",
+            "baminhamu",
+            "barmingahema",
+            "barmingahyama",
+            "beominghaem",
+            "birmingemi",
+            "bo ming han",
+            "brmnghham",
+            "brmyngm  alabama",
+            "parminkam"
+        ],
+        "latitude": 33.52066,
+        "longitude": -86.80249,
+        "elevation": 187,
+        "population": 187,
+        "timezone": "America\/Chicago"
+    },
+    "4986172": {
+        "id": 4986172,
+        "country_code": "US",
+        "state": "MI",
+        "city": "Birmingham",
+        "ascii": "Birmingham",
+        "names": [
+            "Bermingkham",
+            "Birmingem",
+            "Birmingkham",
+            "brmnghham",
+            "byrmngam  myshygan"
+        ],
+        "latitude": 42.5467,
+        "longitude": -83.21132,
+        "elevation": 241,
+        "population": 237,
+        "timezone": "America\/Detroit"
+    }
+}
+
+```
 
 ## Test using averaged-out results
 
@@ -456,6 +563,7 @@ The actual result:
 - 'refresh'
 - 'cities'
 - 'city-id'
+- 'search-city'
 - 'average'
 
 ### Webservice Example 1
@@ -475,6 +583,68 @@ Returns:
 ```
 
 ### Webservice Example 2
+
+Search for city 'wolverhampton'
+
+http://127.0.0.1:12312/stormyglass.php?search-city=wolverhampton
+
+Result:
+
+```
+{
+    "2633691": {
+        "id": 2633691,
+        "country_code": "GB",
+        "state": "ENG",
+        "city": "Wolverhampton",
+        "ascii": "Wolverhampton",
+        "names": [
+            "Goulverchampton",
+            "Heantun",
+            "Ulvurkhamptun",
+            "Vulvergempton",
+            "Vulverhamptonas",
+            "Vulverhempton",
+            "Vulverhemptona",
+            "Vulverkhempton",
+            "Wolverhampton",
+            "Wulfrunehantona",
+            "XVW",
+            "ulbeohaempeuteon",
+            "u~oruvu~ahanputon",
+            "wlwrhmptwn",
+            "wu er fu han pu dun",
+            "wwlbrhmptwn",
+            "wwlfrhambtwn",
+            "\u0393\u03bf\u03c5\u03bb\u03b2\u03b5\u03c1\u03c7\u03ac\u03bc\u03c0\u03c4\u03bf\u03bd",
+            "\u0412\u0443\u043b\u0432\u0435\u0440\u0433\u0435\u043c\u043f\u0442\u043e\u043d",
+            "\u0412\u0443\u043b\u0432\u0435\u0440\u0445\u0435\u043c\u043f\u0442\u043e\u043d",
+            "\u0423\u043b\u0432\u044a\u0440\u0445\u0430\u043c\u043f\u0442\u044a\u043d",
+            "\u054e\u0578\u0582\u056c\u057e\u0565\u0580\u0570\u0565\u0574\u057a\u057f\u0578\u0576",
+            "\u05d5\u05d5\u05d0\u05dc\u05d5\u05d5\u05e2\u05e8\u05d4\u05d0\u05de\u05e4\u05d8\u05d0\u05df",
+            "\u05d5\u05d5\u05dc\u05d1\u05e8\u05d4\u05de\u05e4\u05d8\u05d5\u05df",
+            "\u0648\u0644\u0648\u0631\u0647\u0645\u067e\u062a\u0648\u0646",
+            "\u0648\u0648\u0644\u0641\u0631\u0647\u0627\u0645\u0628\u062a\u0648\u0646",
+            "\u0648\u0648\u0644\u0648\u0631\u06c1\u06cc\u0645\u067e\u0679\u0646",
+            "\u0e27\u0e38\u0e25\u0e40\u0e27\u0e2d\u0e23\u0e4c\u0e41\u0e2e\u0e21\u0e1b\u0e4c\u0e15\u0e31\u0e19",
+            "\u10d5\u10e3\u10da\u10d5\u10d4\u10e0\u10f0\u10d4\u10db\u10de\u10e2\u10dd\u10dc\u10d8",
+            "\u30a6\u30a9\u30eb\u30f4\u30a1\u30fc\u30cf\u30f3\u30d7\u30c8\u30f3",
+            "\u4f0d\u723e\u5f17\u6f22\u666e\u9813",
+            "\uc6b8\ubc84\ud584\ud504\ud134"
+        ],
+        "latitude": 52.58547,
+        "longitude": -2.12296,
+        "elevation": 160,
+        "population": null,
+        "timezone": "Europe\/London"
+    }
+}
+```
+
+The ID 2633691 can then be used to fetch the data for that city.
+
+
+### Webservice Example 3
 
 Get averaged-out results from the web-service for city 1120985:
 

@@ -33,6 +33,7 @@ switch (php_sapi_name()) {
             'cities',
             'city-id',
             'average',
+            'search-city'
         ];
 
         // filter input variables
@@ -117,7 +118,8 @@ $options = getopt("hvdtk:f:oer",
     'refresh',
     'cities',
     'city-id:',
-    'average',
+    'search-city:',
+    'average'
     ]);
 
 $do = [];
@@ -131,6 +133,7 @@ foreach ([
  'refresh' => ['r', 'refresh'],
  'cities' => [null, 'cities'],
  'average' => [null, 'average'],
+ 'search-city' => [null, 'search-city']
 ] as $i => $opts) {
     $do[$i] = (int) (array_key_exists($opts[0], $options) || array_key_exists($opts[1],
             $options));
@@ -193,6 +196,7 @@ if (empty($options) || array_key_exists('h', $options) || array_key_exists('help
         "\t-o,  --offline                Do not go-online when performing tasks (only use local files for url resolution for example)",
         "\t-e,  --echo                   (Optional) Echo/output the result to stdout if successful",
         "\t     --cities                 List known cities with id, names and geolocation co-ordinates then exit.",
+        "\t     --search-city=<text>     Search for city using supplied text.",
         "\t-r,  --refresh                (Optional) Force cache-refresh",
         "\t-k,  --key={api key}          (Required) Stormglass API key (loaded from stormyglass.ini if not set)'",
         "\t     --city-id={city_id}      (Optional) Specify GeoNames city id (in cities.json file) for required latitude/longitude values",
@@ -331,6 +335,33 @@ if (!empty($options['city-id'])) {
     $city = $city[$city_id];
     $options['longitude'] = $city['longitude'];
     $options['latitude'] = $city['latitude'];
+}
+
+// search for city
+if (!empty($options['search-city'])) {
+    $search = trim(strtolower($options['search-city']));
+    $cities = getCities();
+    // removes all unmatched cities
+    foreach ($cities as $i => $city) {
+        if (false !== stristr($city['city'], $search) || false !== stristr($city['ascii'], $search)) {
+            continue;
+        }
+        if (empty($city['names'])) {
+            continue;
+        }
+        foreach ($city['names'] as $name) {
+            if (false !== stristr($name, $search)) {
+                continue;
+            }
+        }
+        unset($cities[$i]);
+    }
+    if (empty($cities)) {
+        $errors[] = "No matching cities matched for city: '$search'";
+        goto errors;
+    }
+    $data = $cities;
+    goto output;
 }
 
 $latitude = array_key_exists('latitude', $options) ? (float) $options['latitude']
