@@ -86,7 +86,7 @@ Searches for city with ID '8349222'
 
 ```
 php stormyglass.php --city-id=8349222 --debug
-``
+```
 
 Debug data of city result:
 
