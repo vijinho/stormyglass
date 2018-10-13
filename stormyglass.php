@@ -50,7 +50,7 @@ unset($params);
 // see https://secure.php.net/manual/en/function.getopt.php
 // : - required, :: - optional
 
-$options = getopt("hvdtk:",
+$options = getopt("hvdtk:f:oer",
     [
     'help', 'verbose', 'debug', 'test', 'offline', 'echo',
     'dir:', 'filename:',
@@ -437,45 +437,78 @@ if (!empty($data)) {
     // cache the result
     $save = json_save($cache_file, $data);
     if (true !== $save) {
-        $errors[] = "\nFailed encoding JSON output file:\n\t$cache_file\n";
+        $errors[] = "\nFailed encoding JSON cached results output file:\n\t$cache_file\n";
         $errors[] = "\nJSON Error: $save\n";
         goto errors;
     } else {
-        verbose(sprintf("JSON written to output file:\n\t%s (%d bytes)\n",
+        verbose(sprintf("JSON written to cached results output file:\n\t%s (%d bytes)\n",
                 $cache_file, filesize($cache_file)));
     }
 }
 
 // average-out results
 if (!empty($data) && $do['average']) {
-    foreach ($data['hours'] as $i => $dataset) {
-        foreach ($dataset as $field => $source) {
-            if ('time' === $field && is_string($source)) {
-                $time = strtotime($source);
-                $dataset['unixtime'] = $time;
-            } else if (is_array($source)) {
-                $value = 0;
-                $nvalues = 0;
-                foreach ($source as $values) {
-                    if (array_key_exists('value', $values)) {
-                        $v = (float) $values['value'];
-                        if (0 < $v) {
-                            $nvalues++;
-                            $value += $v;
+
+    // load from cache
+    $cache_file = $cache_dir . '/avg-' . $cache_key . '.json';
+
+    // load from cache, expire if out-of-date in order to refresh after
+    if (!$do['refresh'] && file_exists($cache_file)) {
+        $expired = time() > ($config['settings']['cache']['seconds'] + filemtime($cache_file));
+        if ($expired) {
+            unlink($cache_file);
+        } else {
+            $averaged_data = json_load($cache_file);
+        }
+    }
+
+    // not in cache!
+    if (!empty($averaged_data)) {
+        debug("Cached averaged data loaded from: $cache_file");
+        $data = $averaged_data;
+    } else {
+        debug("Cached file with averaged data not found for: $cache_file");
+
+        foreach ($data['hours'] as $i => $dataset) {
+            foreach ($dataset as $field => $source) {
+                if ('time' === $field && is_string($source)) {
+                    $time = strtotime($source);
+                    $dataset['unixtime'] = $time;
+                } else if (is_array($source)) {
+                    $value = 0;
+                    $nvalues = 0;
+                    foreach ($source as $values) {
+                        if (array_key_exists('value', $values)) {
+                            $v = (float) $values['value'];
+                            if (0 < $v) {
+                                $nvalues++;
+                                $value += $v;
+                            }
                         }
                     }
+                    $average = (0 === $value) ? 0 : round($value / $nvalues, 3);
+                    $source['average'] = $average;
+                    $dataset[$field] = $average;
                 }
-                $average = (0 === $value) ? 0 : round($value / $nvalues, 3);
-                $source['average'] = average;
-                $dataset[$field] = $average;
             }
+            // remove numerical incremental index, make index the unixtime
+            unset($data['hours'][$i]);
+            $data['hours'][$dataset['unixtime']] = $dataset;
         }
-        // remove numerical incremental index, make index the unixtime
-        unset($data['hours'][$i]);
-        $data['hours'][$dataset['unixtime']] = $dataset;
+        // sort results
+        ksort($data['hours']);
+
+        // cache the result
+        $save = json_save($cache_file, $data);
+        if (true !== $save) {
+            $errors[] = "\nFailed encoding JSON cached average results output file:\n\t$cache_file\n";
+            $errors[] = "\nJSON Error: $save\n";
+            goto errors;
+        } else {
+            verbose(sprintf("JSON written to cached average results output file:\n\t%s (%d bytes)\n",
+                    $cache_file, filesize($cache_file)));
+        }
     }
-    // sort results
-    ksort($data['hours']);
 }
 
 //-----------------------------------------------------------------------------
