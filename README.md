@@ -38,8 +38,10 @@ Call to the stormglass API - https://docs.stormglass.io
         -t,  --test                   Run in test mode, using co-ordinates for Skagen, Denmark from stormyglass.ini file by default.
         -o,  --offline                Do not go-online when performing tasks (only use local files for url resolution for example)
         -e,  --echo                   (Optional) Echo/output the result to stdout if successful
+             --cities                 List known cities with id, names and geolocation co-ordinates then exit.
         -r,  --refresh                (Optional) Force cache-refresh
         -k,  --key={api key}          (Required) Stormglass API key (loaded from stormyglass.ini if not set)'
+             --city-id={city_id}      (Optional) Specify GeoNames city id (in cities.json file) for required latitude/longitude values
              --latitude={-90 - 90}    (Required) Latitude (decimal degrees)
              --longitude={-180 - 180} (Required) Longitude (decimal degrees)
              --source={all}           (Optional) Source. Default: 'all'.  One of (all, dwd, fcoo, fmi, meteo, meto, noaa, sg, smhi, wt, yr)
@@ -77,6 +79,43 @@ Output result to *stdout*
 Output the result to *stdout*, view messages whilst running, and redirect to into another file:
 
 `php stormyglass.php --filename=skagen.json --test --debug --echo 2>&1 >myfile.json`
+
+## Test example using GeoNames City ID
+
+Searches for city with ID '8349222'
+
+```
+php stormyglass.php --city-id=8349222 --debug
+``
+
+Debug data of city result:
+
+```
+Array
+(
+    [8349222] => Array
+        (
+            [id] => 8349222
+            [country_code] => AU
+            [state] => 2
+            [city] => Punchbowl
+            [ascii] => Punchbowl
+            [names] => Array
+                (
+                    [0] =>
+                )
+
+            [latitude] => -33.92893
+            [longitude] => 151.05111
+            [elevation] => 19
+            [population] =>
+            [timezone] => Australia/Sydney
+        )
+
+)
+```
+
+Data saved in: `cache/lat-lng--33.92893_151.05111.json`
 
 
 ## Offline mode debugging example

@@ -62,6 +62,7 @@ $options = getopt("hvdtk:",
     'format:',
     'refresh',
     'cities',
+    'city-id:',
     ]);
 
 $do = [];
@@ -138,6 +139,7 @@ if (empty($options) || array_key_exists('h', $options) || array_key_exists('help
         "\t     --cities                 List known cities with id, names and geolocation co-ordinates then exit.",
         "\t-r,  --refresh                (Optional) Force cache-refresh",
         "\t-k,  --key={api key}          (Required) Stormglass API key (loaded from stormyglass.ini if not set)'",
+        "\t     --city-id={city_id}      (Optional) Specify GeoNames city id (in cities.json file) for required latitude/longitude values",
         "\t     --latitude={-90 - 90}    (Required) Latitude (decimal degrees)",
         "\t     --longitude={-180 - 180} (Required) Longitude (decimal degrees)",
         "\t     --source={all}           (Optional) Source. Default: 'all'.  One of (" . join(', ',
@@ -230,6 +232,7 @@ if ($do['cities']) {
     if (empty($data)) {
         $data = getCities();
     }
+    // save cities and finish
     goto output;
 }
 
@@ -256,6 +259,22 @@ debug("Using API key: $key");
 
 //-----------------------------------------------------------------------------
 // get latitude, longitude
+if (!empty($options['city-id'])) {
+    $city_id = (int) $options['city-id'];
+    if ($city_id < 1) {
+        $errors[] = "Invalid city id: $city_id";
+        goto errors;
+    }
+    $city = getCities($city_id);
+    if (empty($city)) {
+        $errors[] = "City not found with id: $city_id";
+        goto errors;
+    }
+    debug("Found city with id: $city_id", $city);
+    $city = $city[$city_id];
+    $options['longitude'] = $city['longitude'];
+    $options['latitude'] = $city['latitude'];
+}
 
 $latitude = array_key_exists('latitude', $options) ? (float) $options['latitude']
         : null;
@@ -804,6 +823,9 @@ function getCities($id = 0) {
     $cities = [];
     if (!empty($id)) {
         $id = (int) $id;
+        if ($id < 1) {
+            return [];
+        }
     }
     while ($data = fgetcsv($fh, 0, "\t")) {
         $data = to_charset($data);
@@ -821,9 +843,9 @@ function getCities($id = 0) {
             'population' => empty($data[15]) ? null : (int) $data[15],
             'timezone' => $data[17],
         ];
-        if (0 === $id) {
+        if (empty($id)) {
             $cities[$geoname_id] = $city;
-        } else {
+        } else if ($id === $geoname_id) {
             $cities = [$geoname_id => $city];
             break;
         }
