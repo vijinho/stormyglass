@@ -358,6 +358,12 @@ Array
 
 Data saved in: `cache/lat-lng--33.92893_151.05111.json`
 
+## Test example using GeoNames CityID and data from today until next Sunday
+
+This will search the data for Barcelona (city id 3128760) from today (00:00) until 'next Sunday (00:00)', save the result to 'barcelona.json' and also echo the output and debug information, piping it into 'less' to view on the command line.
+
+`php stormyglass.php --city-id=3128760 --average --filename=barcelona.json --date-from=today --date-to='next sunday' --echo --debug 2>&1 | less`
+
 
 ## Offline mode debugging example
 
