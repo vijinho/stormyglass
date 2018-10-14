@@ -537,7 +537,7 @@ if (!empty($data)) {
 }
 
 // average-out results
-if (!empty($data) && $do['average']) {
+if ($do['average'] && !empty($data)) {
 
     // load from cache
     $cache_file = $cache_dir . '/avg-' . $cache_key . '.json';
@@ -569,8 +569,18 @@ if (!empty($data) && $do['average']) {
                     $nvalues = 0;
                     foreach ($source as $values) {
                         if (array_key_exists('value', $values)) {
-                            $v = (float) $values['value'];
-                            if (0 < $v) {
+                            $v = $values['value'];
+                            if (is_numeric($v)) {
+                                $float = (string)(float) $v;
+                                if (is_int($v)) {
+                                    $v = (int) $v;
+                                } else if (is_float($v) || $v === $float) {
+                                    $v = (float) $v;
+                                } else {
+                                    $v = (int) $v;
+                                }
+                            }
+                            if (0 !== $v) {
                                 $nvalues++;
                                 $value += $v;
                             }
@@ -585,6 +595,7 @@ if (!empty($data) && $do['average']) {
             unset($data['hours'][$i]);
             $data['hours'][$dataset['unixtime']] = $dataset;
         }
+
         // sort results
         ksort($data['hours']);
 
