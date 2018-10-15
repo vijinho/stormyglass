@@ -210,8 +210,8 @@ if (empty($options) || array_key_exists('h', $options) || array_key_exists('help
         "\t     --date-to={all}          (Optional) End date/time for last forecast, default 'all' see: https://secure.php.net/manual/en/function.strtotime.php ",
         "\t     --average                Return the average of the combined results from across the various sources.",
         "\t     --dir={.}                (Optional) Directory for storing files (current dir if not specified)",
-        "\t-f,  --filename={output.}     (Optional) Filename for output data from operation, default is 'output.{--format}'",
-        "\t     --format={json}          (Optional) Output format for script data: json (default)",
+        "\t-f,  --filename={output.}     (Optional) Filename for output data from operation",
+        "\t     --format={json}          (Optional) Output format for output filename (reserved for future): json (default)",
     ]);
 
     // goto jump here if there's a problem
@@ -259,7 +259,7 @@ if (empty($dircheck) || !is_dir($dircheck)) {
     goto errors;
 }
 
-$output_filename = !empty($options['filename']) ? $options['filename'] : 'output.' . OUTPUT_FORMAT;
+$output_filename = !empty($options['filename']) ? $options['filename'] : '';
 
 
 //-----------------------------------------------------------------------------
@@ -630,7 +630,7 @@ if (is_array($data) && !empty($data)) {
 // only write/display output if we have some!
 if (!empty($output)) {
 
-    if ($save_data) {
+    if ($save_data && !empty($output_filename)) {
         $file = realpath($dir) . '/' . $output_filename;
         switch (OUTPUT_FORMAT) {
             default:

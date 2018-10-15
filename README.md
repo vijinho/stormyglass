@@ -85,8 +85,8 @@ Call to the stormglass API - https://docs.stormglass.io
              --date-to={all}          (Optional) End date/time for last forecast, default 'all' see: https://secure.php.net/manual/en/function.strtotime.php
              --average                Return the average of the combined results from across the various sources.
              --dir={.}                (Optional) Directory for storing files (current dir if not specified)
-        -f,  --filename={output.}     (Optional) Filename for output data from operation, default is 'output.{--format}'
-             --format={json}          (Optional) Output format for script data: json (default)
+        -f,  --filename={output.}     (Optional) Filename for output data from operation
+             --format={json}          (Optional) Output format for output filename (reserved for future): json (default)
 ```
 
 ### Requirements/Installation
