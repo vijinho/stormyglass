@@ -1,0 +1,6 @@
+<Files 'stormyglass.ini'>
+Order Allow,Deny
+Deny from all
+</Files>
+
+DirectoryIndex stormyglass.php
