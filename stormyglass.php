@@ -209,7 +209,7 @@ if (empty($options) || array_key_exists('h', $options) || array_key_exists('help
         "\t     --date-from={now}        (Optional) Start date/time (at most 48 hours before current UTC), default 'today 00:00:00' see: https://secure.php.net/manual/en/function.strtotime.php",
         "\t     --date-to={all}          (Optional) End date/time for last forecast, default 'all' see: https://secure.php.net/manual/en/function.strtotime.php ",
         "\t     --average                Return the average of the combined results from across the various sources.",
-        "\t     --dir={.}                (Optional) Directory for storing files (current dir if not specified)",
+        "\t     --dir=                   (Optional) Directory for storing files (sys_get_temp_dir() if not specified)",
         "\t-f,  --filename={output.}     (Optional) Filename for output data from operation",
         "\t     --format={json}          (Optional) Output format for output filename (reserved for future): json (default)",
     ]);
@@ -249,7 +249,7 @@ verbose("OUTPUT_FORMAT: $format");
 //-----------------------------------------------------------------------------
 // get dir and file for output
 
-$dir = '';
+$dir = sys_get_temp_dir();
 if (!empty($options['dir'])) {
     $dir = $options['dir'];
 }
@@ -276,7 +276,7 @@ define('FILE_TSV_CITIES', $cities_file);
 
 if ($do['cities']) {
     $data = [];
-    $output_filename = 'cache/cities.json';
+    $output_filename = realpath($dir) . '/' . 'cities.json';
     // remove old-file if refresh
     if ($do['refresh']) {
         unlink($output_filename);
@@ -491,7 +491,7 @@ verbose('Request params:', $request_params);
 // load from cache
 $cache_key  = join('-', array_keys($request_params)) . '-' . join('_',
         $request_params);
-$cache_dir  = realpath(dirname(__FILE__)) . '/cache';
+$cache_dir  = realpath($dir);
 $cache_file = $cache_dir . '/' . $cache_key . '.json';
 
 // load from cache, expire if out-of-date in order to refresh after
@@ -631,7 +631,7 @@ if (is_array($data) && !empty($data)) {
 if (!empty($output)) {
 
     if ($save_data && !empty($output_filename)) {
-        $file = realpath($dir) . '/' . $output_filename;
+        $file = $output_filename;
         switch (OUTPUT_FORMAT) {
             default:
             case 'json':

@@ -84,7 +84,7 @@ Call to the stormglass API - https://docs.stormglass.io
              --date-from={now}        (Optional) Start date/time (at most 48 hours before current UTC), default 'today 00:00:00' see: https://secure.php.net/manual/en/function.strtotime.php
              --date-to={all}          (Optional) End date/time for last forecast, default 'all' see: https://secure.php.net/manual/en/function.strtotime.php
              --average                Return the average of the combined results from across the various sources.
-             --dir={.}                (Optional) Directory for storing files (current dir if not specified)
+             --dir={}                 (Optional) Directory for storing files (sys_get_temp_dir() if not specified)
         -f,  --filename={output.}     (Optional) Filename for output data from operation
              --format={json}          (Optional) Output format for output filename (reserved for future): json (default)
 ```
@@ -95,6 +95,7 @@ Call to the stormglass API - https://docs.stormglass.io
 - PHP7
 - curl (command-line)
 - Copy the `stormyglass.ini.dist` to `stormyglass.ini` and add your API key there.
+- Run `php stormyglass.php --cities` to generate temp file `cities.json` file from `data/cities15000.tsv`
 
 ## Testing Example
 
